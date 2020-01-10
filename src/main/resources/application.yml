@@ -1,0 +1,15 @@
+server:
+  servlet:
+    context-path: /postulacionSura
+    application-display-name: postulacionSura
+spring:
+  application:    name: postulacionSura
+  profiles:
+    active: dev
+api:
+  url: http://api.worldweatheronline.com/premium/v1/weather.ashx?key=
+  key: 8fc74c94a0d94e64a98225141200801
+  days: 7permiso:
+  crossorigin:
+    url: http://localhost:4200
+    #url: http://172.16.7.39
