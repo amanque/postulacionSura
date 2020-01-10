@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import cl.sura.postulacion.config.Constants;
 import cl.sura.postulacion.error.ServiceException;
 import cl.sura.postulacion.model.ResponseData;
 import cl.sura.postulacion.service.WeatherService;
@@ -31,16 +32,14 @@ public class WeatherServiceImpl implements WeatherService {
 	public ResponseData getWeatherCiudadChile(String ciudad) throws Exception{
 		ciudad = normalizarText(ciudad);
 		ResponseData json = restTemplate.getForObject(
-				this.url + this.key + "&q=" + normalizarText(ciudad) + ", chile" + "&format=json&num_of_days=" + this.days, ResponseData.class);
+				this.url + this.key + "&q=" + ciudad + ", " + Constants.PAIS + "&format=json&num_of_days=" + this.days, ResponseData.class);
 		try {
-			if(json.getData().getRequest() ==  null)
-				throw new ServiceException(HttpStatus.BAD_REQUEST.value(), "Ciudad no existe, vuelva a intentarlo", 1);
-			else if(!json.getData().getRequest().get(0).getQuery().contains("Chile") && json.getData().getRequest().get(0).getType().equals("City"))
-				throw new ServiceException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value(), "Ciudad existe pero no pertenece al país de Chile. " + json.getData().getRequest().get(0).getQuery(), 2);
-			else if(!json.getData().getRequest().get(0).getType().equals("City"))
-				throw new ServiceException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value(), "La información obtenida no corresponde a una ciudad.", 3);
-			else if(!json.getData().getRequest().get(0).getQuery().toUpperCase().contains(ciudad.toUpperCase()))
-				throw new ServiceException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value(), "Ciudad no existe", 4);
+			if(!json.getData().getRequest().get(0).getQuery().contains(Constants.PAIS) && json.getData().getRequest().get(0).getType().equals("City"))
+				throw new ServiceException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value(), Constants.MSG_ERROR_2 + json.getData().getRequest().get(0).getQuery(), 2);
+			else if(json.getData().getRequest() == null || !json.getData().getRequest().get(0).getQuery().toUpperCase().contains(ciudad.toUpperCase()))
+				throw new ServiceException(HttpStatus.BAD_REQUEST.value(), Constants.MSG_ERROR_1, 1);
+			else if(!json.getData().getRequest().get(0).getType().equals(Constants.CITY))
+				throw new ServiceException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value(), Constants.MSG_ERROR_3, 3);
 			
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
